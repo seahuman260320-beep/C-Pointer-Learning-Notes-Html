@@ -125,12 +125,12 @@
 
     .note:hover {
       transform: translateY(-3px);
-      border-color: var(--green);
+      border-color: var(--blue);
       box-shadow: 0 10px 22px rgba(40, 62, 47, 0.1);
     }
 
     .note:nth-child(2):hover {
-      border-color: var(--blue);
+      border-color: var(--green);
     }
 
     .number {
@@ -154,12 +154,12 @@
     .open {
       margin-top: auto;
       padding-top: 18px;
-      color: var(--green);
+      color: var(--blue);
       font-weight: 700;
     }
 
     .note:nth-child(2) .open {
-      color: var(--blue);
+      color: var(--green);
     }
 
     .path {
@@ -236,24 +236,24 @@
     <main>
       <h2>笔记目录</h2>
       <div class="notes">
-        <a class="note" href="C语言指针大小与内存地址.html">
+        <a class="note" href="C语言基础指针.html">
           <span class="number">NOTE 01</span>
-          <h3>指针大小与内存地址</h3>
-          <p>理解指针保存什么、对象首地址、32/64 位指针大小，以及不同指针类型的步长。</p>
+          <h3>基础指针：地址、指向与解引用</h3>
+          <p>分清指针与指针变量，掌握取地址、解引用、指针运算、空指针和指针形参。</p>
           <span class="open">打开笔记 →</span>
         </a>
 
-        <a class="note" href="C语言基础指针.html">
+        <a class="note" href="C语言指针大小与内存地址.html">
           <span class="number">NOTE 02</span>
-          <h3>基础指针：地址、指向与解引用</h3>
-          <p>分清指针与指针变量，掌握取地址、解引用、指针运算、空指针和指针形参。</p>
+          <h3>指针大小与内存地址</h3>
+          <p>理解指针保存什么、对象首地址、32/64 位指针大小，以及不同指针类型的步长。</p>
           <span class="open">打开笔记 →</span>
         </a>
       </div>
 
       <div class="path">
         <strong>建议顺序</strong>
-        先阅读“指针大小与内存地址”，再进入“基础指针”，建立从内存地址到实际代码操作的完整认识。
+        先阅读“基础指针”，理解地址、指向和解引用；再学习“指针大小与内存地址”，补充平台与内存布局知识。
       </div>
     </main>
 
