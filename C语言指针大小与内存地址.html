@@ -74,10 +74,29 @@
 
     .toolbar {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       padding: 14px 36px;
       border-bottom: 1px solid var(--line);
       background: #f7f8f2;
+    }
+
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      color: var(--green);
+      background: #fff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .home-link:hover {
+      color: #fff;
+      background: var(--green);
     }
 
     button {
@@ -279,6 +298,7 @@
     </header>
 
     <div class="toolbar" aria-label="折叠内容控制">
+      <a class="home-link" href="index.html">← 返回笔记目录</a>
       <button type="button" id="expand-all">＋ 全部展开</button>
       <button type="button" id="collapse-all">− 全部收起</button>
     </div>
