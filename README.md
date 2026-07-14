@@ -4,6 +4,8 @@
 
 项目将知识点拆分为独立章节，并提供目录、侧边栏导航、代码示例和重点提示。无需安装依赖或执行构建，下载后即可在浏览器中阅读，也适合通过 GitHub Pages 发布。
 
+**在线访问：** [https://seahuman260320-beep.github.io/C-Pointer-Learning-Notes-Html/](https://seahuman260320-beep.github.io/C-Pointer-Learning-Notes-Html/)
+
 ## 笔记内容
 
 | 章节 | 主要内容 |
