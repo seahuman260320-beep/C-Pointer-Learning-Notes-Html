@@ -106,7 +106,7 @@
 
     .notes {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 16px;
     }
 
@@ -131,6 +131,10 @@
 
     .note:nth-child(2):hover {
       border-color: var(--green);
+    }
+
+    .note:nth-child(3):hover {
+      border-color: var(--gold);
     }
 
     .number {
@@ -160,6 +164,10 @@
 
     .note:nth-child(2) .open {
       color: var(--green);
+    }
+
+    .note:nth-child(3) .open {
+      color: #9b6a00;
     }
 
     .path {
@@ -228,7 +236,7 @@
         <p class="lead">从地址和内存开始，逐步掌握指向、解引用、指针运算与安全使用规则。</p>
       </div>
       <div class="count" aria-label="当前笔记数量">
-        <strong>2</strong>
+        <strong>3</strong>
         <span>篇笔记</span>
       </div>
     </header>
@@ -249,11 +257,18 @@
           <p>理解指针保存什么、对象首地址、32/64 位指针大小，以及不同指针类型的步长。</p>
           <span class="open">打开笔记 →</span>
         </a>
+
+        <a class="note" href="C语言数组与指针.html">
+          <span class="number">NOTE 03</span>
+          <h3>数组名、指针与下标运算</h3>
+          <p>理解数组名向首元素指针的转换，以及 <code>p[i]</code>、<code>*(p + i)</code> 和数组边界。</p>
+          <span class="open">打开笔记 →</span>
+        </a>
       </div>
 
       <div class="path">
         <strong>建议顺序</strong>
-        先阅读“基础指针”，理解地址、指向和解引用；再学习“指针大小与内存地址”，补充平台与内存布局知识。
+        先阅读“基础指针”，再学习“指针大小与内存地址”，最后进入“数组名、指针与下标运算”。
       </div>
     </main>
 

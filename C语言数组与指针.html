@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C语言数组名、指针与下标运算</title>
+  <style>
+    :root {
+      --paper: #fffdf7;
+      --ink: #20251f;
+      --muted: #667067;
+      --line: #d7ddd4;
+      --green: #246b4a;
+      --green-soft: #e8f2eb;
+      --blue: #315f7d;
+      --blue-soft: #e7f0f5;
+      --gold: #bf8917;
+      --gold-soft: #fff3d3;
+      --red: #a33a32;
+      --red-soft: #f8e9e6;
+      --code-bg: #202722;
+      --code-text: #edf5ed;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background-color: #eef0e9;
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent 0,
+        transparent 31px,
+        rgba(72, 94, 75, 0.07) 32px
+      );
+      font-family: "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
+      line-height: 1.75;
+    }
+
+    .site-layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 960px);
+      align-items: start;
+      gap: 18px;
+      width: min(1228px, calc(100% - 32px));
+      margin: 32px auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--gold);
+      background: var(--paper);
+      box-shadow: 0 10px 24px rgba(31, 43, 35, 0.08);
+    }
+
+    .sidebar-head {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-head a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .sidebar-group {
+      padding: 14px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-group:last-child {
+      border-bottom: 0;
+    }
+
+    .sidebar-title {
+      margin: 0 8px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sidebar-link {
+      display: block;
+      margin-top: 3px;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      border-radius: 0 5px 5px 0;
+      color: #384139;
+      text-decoration: none;
+      line-height: 1.45;
+    }
+
+    .sidebar-link:hover {
+      color: var(--gold);
+      background: var(--gold-soft);
+    }
+
+    .sidebar-link.active {
+      border-left-color: var(--gold);
+      color: #8a610b;
+      background: var(--gold-soft);
+      font-weight: 700;
+    }
+
+    .sidebar-link small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .section-link {
+      padding-top: 6px;
+      padding-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .page {
+      width: 100%;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--gold);
+      background: var(--paper);
+      box-shadow: 0 12px 32px rgba(31, 43, 35, 0.1);
+    }
+
+    header {
+      padding: 32px 36px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: #8a610b;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "STKaiti", "KaiTi", serif;
+      font-size: 38px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 780px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 36px;
+      border-bottom: 1px solid var(--line);
+      background: #f7f8f2;
+    }
+
+    .nav-link,
+    button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid #aeb8ad;
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-link:first-child {
+      border-color: var(--gold);
+      color: #8a610b;
+      font-weight: 700;
+    }
+
+    .nav-link:hover,
+    button:hover {
+      border-color: var(--gold);
+      color: #fff;
+      background: var(--gold);
+    }
+
+    main {
+      padding: 10px 36px 36px;
+    }
+
+    section {
+      padding: 26px 0;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 24px;
+    }
+
+    section:last-child {
+      border-bottom: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 23px;
+      line-height: 1.4;
+    }
+
+    h3 {
+      margin: 20px 0 8px;
+      font-size: 18px;
+    }
+
+    code {
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    :not(pre) > code {
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #174b34;
+      background: #e4eee5;
+    }
+
+    pre {
+      margin: 14px 0 0;
+      padding: 18px;
+      overflow-x: auto;
+      border-radius: 6px;
+      color: var(--code-text);
+      background: var(--code-bg);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .conclusion,
+    .correction,
+    .warning {
+      padding: 15px 17px;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .conclusion {
+      border-left: 5px solid var(--green);
+      background: var(--green-soft);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .correction {
+      margin-top: 14px;
+      border-left: 5px solid var(--blue);
+      color: #294e66;
+      background: var(--blue-soft);
+    }
+
+    .warning {
+      margin-top: 14px;
+      border-left: 5px solid var(--red);
+      color: #762a25;
+      background: var(--red-soft);
+    }
+
+    .array-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(82px, 1fr));
+      margin: 18px 0;
+      overflow-x: auto;
+      border: 1px solid #cbb774;
+      border-radius: 6px;
+    }
+
+    .array-cell {
+      min-width: 82px;
+      padding: 12px 8px;
+      border-right: 1px solid #cbb774;
+      background: #fff9e8;
+      text-align: center;
+    }
+
+    .array-cell:last-child {
+      border-right: 0;
+    }
+
+    .array-cell strong,
+    .array-cell span {
+      display: block;
+    }
+
+    .array-cell strong {
+      color: #8a610b;
+      font-size: 19px;
+    }
+
+    .array-cell span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 16px;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f5f0df;
+    }
+
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .answer {
+      padding: 0 16px 16px;
+      color: #303830;
+    }
+
+    .answer p:first-child {
+      margin-top: 4px;
+    }
+
+    footer {
+      padding: 18px 36px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: #f7f8f2;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 680px) {
+      .site-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+        width: 100%;
+        margin: 0;
+      }
+
+      .sidebar {
+        position: static;
+        max-height: none;
+        border-right: 0;
+        border-left: 0;
+        box-shadow: none;
+      }
+
+      .page {
+        border-right: 0;
+        border-left: 0;
+        box-shadow: none;
+      }
+
+      header,
+      main,
+      footer,
+      .toolbar {
+        padding-right: 20px;
+        padding-left: 20px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      .array-strip {
+        grid-template-columns: repeat(5, 82px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="左侧导航目录">
+      <div class="sidebar-head"><a href="index.html">C语言指针学习笔记</a></div>
+      <nav class="sidebar-group" aria-label="笔记目录">
+        <p class="sidebar-title">笔记目录</p>
+        <a class="sidebar-link" href="C语言基础指针.html">01 基础指针<small>地址、指向与解引用</small></a>
+        <a class="sidebar-link" href="C语言指针大小与内存地址.html">02 指针大小<small>大小、首地址与步长</small></a>
+        <a class="sidebar-link active" href="C语言数组与指针.html">03 数组与指针<small>数组名、下标与边界</small></a>
+      </nav>
+      <nav class="sidebar-group" aria-label="本篇目录">
+        <p class="sidebar-title">本篇目录</p>
+        <a class="sidebar-link section-link" href="#array">一、一维数组</a>
+        <a class="sidebar-link section-link" href="#decay">二、数组名的转换</a>
+        <a class="sidebar-link section-link" href="#equivalence">三、常用等价写法</a>
+        <a class="sidebar-link section-link" href="#subscript">四、为什么 p[2] 合法</a>
+        <a class="sidebar-link section-link" href="#program">五、完整程序</a>
+        <a class="sidebar-link section-link" href="#bounds">六、数组边界</a>
+        <a class="sidebar-link section-link" href="#differences">七、数组与指针区别</a>
+        <a class="sidebar-link section-link" href="#summary">八、最后总结</a>
+      </nav>
+    </aside>
+
+    <article class="page">
+      <header>
+        <p class="kicker">C语言 · 指针基础笔记 03</p>
+        <h1>数组名、指针与下标运算</h1>
+        <p class="lead">理解数组名为什么经常表现得像指针，以及 <code>p[i]</code> 为什么能够访问数组元素。</p>
+      </header>
+
+      <nav class="toolbar" aria-label="笔记导航">
+        <a class="nav-link" href="index.html">← 返回笔记目录</a>
+        <a class="nav-link" href="C语言指针大小与内存地址.html">← 上一篇：指针大小</a>
+        <button type="button" id="expand-all">＋ 全部展开</button>
+        <button type="button" id="collapse-all">− 全部收起</button>
+      </nav>
+
+      <main>
+        <section id="array">
+          <h2>一、一维数组保存一组同类型元素</h2>
+          <pre><code>int a[5] = {1, 2, 3, 4, 5};</code></pre>
+
+          <p>这条语句创建了一个包含 5 个 <code>int</code> 元素的一维数组。数组元素在内存中按顺序连续排列。</p>
+
+          <div class="array-strip" aria-label="数组a的元素示意图">
+            <div class="array-cell"><strong>1</strong><span>a[0]</span></div>
+            <div class="array-cell"><strong>2</strong><span>a[1]</span></div>
+            <div class="array-cell"><strong>3</strong><span>a[2]</span></div>
+            <div class="array-cell"><strong>4</strong><span>a[3]</span></div>
+            <div class="array-cell"><strong>5</strong><span>a[4]</span></div>
+          </div>
+
+          <div class="conclusion">理解一个数组至少要关注元素类型、数组名和元素个数。这里的类型是 <code>int</code>，名字是 <code>a</code>，长度是 5。</div>
+        </section>
+
+        <section id="decay">
+          <h2>二、数组名不是指针变量</h2>
+          <div class="correction">
+            “数组名是指针常量”是便于入门的说法，但不够准确。数组名表示数组对象；在大多数表达式中，数组表达式会自动转换为指向首元素的指针。
+          </div>
+
+          <pre><code>int a[5] = {1, 2, 3, 4, 5};
+int *p = a;  // 此处 a 转换为 &amp;a[0]</code></pre>
+
+          <table>
+            <thead>
+              <tr><th>表达式</th><th>常见含义</th><th>类型</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>a</code></td><td>在多数表达式中转换为首元素地址</td><td><code>int *</code></td></tr>
+              <tr><td><code>&amp;a[0]</code></td><td>第一个元素的地址</td><td><code>int *</code></td></tr>
+              <tr><td><code>&amp;a</code></td><td>整个数组的地址</td><td><code>int (*)[5]</code></td></tr>
+              <tr><td><code>p</code></td><td>保存首元素地址的指针变量</td><td><code>int *</code></td></tr>
+            </tbody>
+          </table>
+
+          <details open>
+            <summary>问题：既然 <code>a</code> 经常等于 <code>&amp;a[0]</code>，为什么不能写 <code>a = p;</code>？</summary>
+            <div class="answer">
+              <p>因为 <code>a</code> 是数组名，不是一个可以重新赋值的指针变量。数组创建后，它所代表的那块数组存储区域不能通过给数组名赋值来改变。</p>
+              <p><code>p</code> 才是指针变量，可以保存另一个合适的地址。</p>
+            </div>
+          </details>
+        </section>
+
+        <section id="equivalence">
+          <h2>三、数组和指针的常用等价写法</h2>
+          <pre><code>int a[5] = {1, 2, 3, 4, 5};
+int *p = a;
+
+a        == &amp;a[0]
+*a       == a[0]
+a + 1    == &amp;a[1]
+*(a + 1) == a[1]
+a[i]     == *(a + i)
+p[i]     == *(p + i)</code></pre>
+
+          <p>这些等价关系成立的核心是：加法按照所指元素类型移动。对于 <code>int *</code>，加 1 表示移动到下一个 <code>int</code> 元素。</p>
+
+          <details>
+            <summary>问题：<code>a + 1</code> 是地址增加 1 个字节吗？</summary>
+            <div class="answer">
+              <p>不是。它移动一个 <code>int</code> 元素的距离，通常是 <code>sizeof(int)</code> 个字节。指针运算的单位是元素，不是字节。</p>
+            </div>
+          </details>
+        </section>
+
+        <section id="subscript">
+          <h2>四、为什么指针可以写成 <code>p[2]</code>？</h2>
+          <p>在 C 语言中，下标表达式按照下面的规则解释：</p>
+
+          <div class="conclusion"><code>p[i]</code> 等价于 <code>*(p + i)</code></div>
+
+          <pre><code>int a[3] = {10, 20, 30};
+int *p = a;
+
+p[2] = 300;</code></pre>
+
+          <p>上面的赋值可以逐步展开：</p>
+
+          <pre><code>p + 2          // 得到 a[2] 的地址
+*(p + 2)       // 访问 a[2]
+*(p + 2) = 300 // 修改 a[2]
+
+// 因此：
+p[2] = 300;</code></pre>
+
+          <table>
+            <thead>
+              <tr><th>表达式</th><th>访问对象</th><th>初始值</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>p</code>、<code>p + 0</code></td><td><code>a[0]</code></td><td>10</td></tr>
+              <tr><td><code>p + 1</code></td><td><code>a[1]</code></td><td>20</td></tr>
+              <tr><td><code>p + 2</code></td><td><code>a[2]</code></td><td>30</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="program">
+          <h2>五、完整示例程序</h2>
+          <pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[3] = {10, 20, 30};
+    int *p = a;
+
+    *p = 100;       // 修改 a[0]
+    *(p + 1) = 200; // 修改 a[1]
+    p[2] = 300;     // 等价于 *(p + 2) = 300
+
+    printf("%d %d %d\n", a[0], a[1], a[2]);
+    return 0;
+}</code></pre>
+
+          <p>程序输出：</p>
+          <pre><code>100 200 300</code></pre>
+
+          <details open>
+            <summary>问题：这里的 <code>p</code> 是数组吗？</summary>
+            <div class="answer">
+              <p>不是。<code>p</code> 是指针变量，只保存了 <code>a[0]</code> 的地址。但由于数组元素连续存储，p 可以在合法边界内通过指针运算访问后续元素。</p>
+            </div>
+          </details>
+        </section>
+
+        <section id="bounds">
+          <h2>六、使用下标必须遵守数组边界</h2>
+          <pre><code>int a[3] = {10, 20, 30};
+int *p = a;
+
+p[0]; // 正确，对应 a[0]
+p[1]; // 正确，对应 a[1]
+p[2]; // 正确，对应 a[2]
+p[3]; // 错误，超过数组范围</code></pre>
+
+          <div class="warning">
+            越界访问属于未定义行为。程序可能崩溃、读到垃圾值、破坏其他数据，也可能暂时看起来正常；“没有立即报错”不代表代码正确。
+          </div>
+        </section>
+
+        <section id="differences">
+          <h2>七、数组和指针相似，但不是同一种对象</h2>
+          <table>
+            <thead>
+              <tr><th>比较项</th><th>数组 <code>a</code></th><th>指针变量 <code>p</code></th></tr>
+            </thead>
+            <tbody>
+              <tr><td>本质</td><td>包含多个元素的数组对象</td><td>保存地址的变量</td></tr>
+              <tr><td>能否重新赋值</td><td>不能写 <code>a = p</code></td><td>可以写 <code>p = other</code></td></tr>
+              <tr><td><code>sizeof</code></td><td><code>sizeof(a)</code> 是整个数组大小</td><td><code>sizeof(p)</code> 是指针本身大小</td></tr>
+              <tr><td>下标访问</td><td><code>a[i]</code></td><td><code>p[i]</code>，前提是指向有效连续元素</td></tr>
+            </tbody>
+          </table>
+
+          <pre><code>int a[5];
+int *p = a;
+
+sizeof(a); // 通常是 5 * sizeof(int)
+sizeof(p); // 指针大小，常见为 4 或 8 字节</code></pre>
+
+          <div class="correction">
+            方括号并不是数组对象独有的语法。只要指针指向合法的连续元素区域，就可以使用下标；但它不会自动检查边界。
+          </div>
+        </section>
+
+        <section id="summary">
+          <h2>八、最后总结</h2>
+          <div class="conclusion">
+            数组名不是指针变量，但在大多数表达式中会转换为首元素指针；下标运算 <code>x[i]</code> 本质上等价于 <code>*(x + i)</code>，所有访问都必须位于有效数组边界内。
+          </div>
+        </section>
+      </main>
+
+      <footer>核心记忆：数组名会转换，指针可以下标，访问不能越界。</footer>
+    </article>
+  </div>
+
+  <script>
+    const details = document.querySelectorAll("details");
+
+    document.getElementById("expand-all").addEventListener("click", () => {
+      details.forEach((item) => {
+        item.open = true;
+      });
+    });
+
+    document.getElementById("collapse-all").addEventListener("click", () => {
+      details.forEach((item) => {
+        item.open = false;
+      });
+    });
+  </script>
+</body>
+</html>
