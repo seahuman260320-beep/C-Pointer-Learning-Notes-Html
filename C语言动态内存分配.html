@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C语言动态内存分配</title>
+  <style>
+    :root {
+      --paper: #fffdf7;
+      --ink: #20251f;
+      --muted: #667067;
+      --line: #d7ddd4;
+      --green: #246b4a;
+      --green-soft: #e8f2eb;
+      --blue: #315f7d;
+      --blue-soft: #e7f0f5;
+      --gold: #bf8917;
+      --gold-soft: #fff3d3;
+      --red: #a33a32;
+      --red-soft: #f8e9e6;
+      --code-bg: #202722;
+      --code-text: #edf5ed;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background-color: #eef0e9;
+      background-image: repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(72, 94, 75, 0.07) 32px);
+      font-family: "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
+      line-height: 1.75;
+    }
+
+    .site-layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 960px);
+      align-items: start;
+      gap: 18px;
+      width: min(1228px, calc(100% - 32px));
+      margin: 32px auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--blue);
+      background: var(--paper);
+      box-shadow: 0 10px 24px rgba(31, 43, 35, 0.08);
+    }
+
+    .sidebar-head { padding: 18px 18px 12px; border-bottom: 1px solid var(--line); }
+    .sidebar-head a { color: var(--green); text-decoration: none; font-weight: 700; }
+    .sidebar-group { padding: 14px 10px; border-bottom: 1px solid var(--line); }
+    .sidebar-group:last-child { border-bottom: 0; }
+    .sidebar-title { margin: 0 8px 8px; color: var(--muted); font-size: 12px; font-weight: 700; }
+
+    .sidebar-link {
+      display: block;
+      margin-top: 3px;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      border-radius: 0 5px 5px 0;
+      color: #384139;
+      text-decoration: none;
+      line-height: 1.45;
+    }
+
+    .sidebar-link:hover { color: var(--blue); background: var(--blue-soft); }
+    .sidebar-link.active { border-left-color: var(--blue); color: var(--blue); background: var(--blue-soft); font-weight: 700; }
+    .sidebar-link small { display: block; color: var(--muted); font-size: 11px; }
+    .section-link { padding-top: 6px; padding-bottom: 6px; font-size: 13px; }
+
+    .page {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--blue);
+      background: var(--paper);
+      box-shadow: 0 12px 32px rgba(31, 43, 35, 0.1);
+    }
+
+    header { padding: 32px 36px 24px; border-bottom: 1px solid var(--line); }
+    .kicker { margin: 0 0 8px; color: var(--blue); font-size: 14px; font-weight: 700; }
+    h1 { margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 38px; line-height: 1.25; letter-spacing: 0; }
+    .lead { max-width: 780px; margin: 14px 0 0; color: var(--muted); font-size: 17px; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 36px;
+      border-bottom: 1px solid var(--line);
+      background: #f7f8f2;
+    }
+
+    .nav-link,
+    button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid #aeb8ad;
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-link:first-child { border-color: var(--blue); color: var(--blue); font-weight: 700; }
+    .nav-link:hover, button:hover { border-color: var(--blue); color: #fff; background: var(--blue); }
+    main { padding: 10px 36px 36px; }
+    section { padding: 26px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
+    section:last-child { border-bottom: 0; }
+    h2 { margin: 0 0 14px; font-size: 23px; line-height: 1.4; }
+    h3 { margin: 20px 0 8px; font-size: 18px; }
+    p { margin: 10px 0; }
+    code { font-family: Consolas, "Courier New", monospace; }
+    :not(pre) > code { padding: 2px 6px; border-radius: 4px; color: #174b34; background: #e4eee5; }
+
+    pre {
+      margin: 14px 0 0;
+      padding: 18px;
+      overflow-x: auto;
+      border-radius: 6px;
+      color: var(--code-text);
+      background: var(--code-bg);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .conclusion, .correction, .warning { margin-top: 14px; padding: 15px 17px; border-radius: 0 6px 6px 0; }
+    .conclusion { border-left: 5px solid var(--green); background: var(--green-soft); font-size: 17px; font-weight: 700; }
+    .correction { border-left: 5px solid var(--blue); color: #294e66; background: var(--blue-soft); }
+    .warning { border-left: 5px solid var(--red); color: #762a25; background: var(--red-soft); }
+
+    .memory-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .memory-step { min-height: 94px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; text-align: center; }
+    .memory-step strong, .memory-step span { display: block; }
+    .memory-step strong { color: var(--blue); }
+    .memory-step span { margin-top: 5px; color: var(--muted); font-size: 13px; }
+    .arrow { color: var(--gold); font-size: 22px; font-weight: 700; }
+
+    table { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 15px; }
+    th, td { padding: 11px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf2f3; }
+    details { margin-top: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+    summary { padding: 13px 16px; cursor: pointer; font-weight: 700; }
+    .answer { padding: 0 16px 16px; color: #303830; }
+    footer { padding: 18px 36px; border-top: 1px solid var(--line); color: var(--muted); background: #f7f8f2; text-align: center; font-size: 14px; }
+
+    @media (max-width: 680px) {
+      .site-layout { grid-template-columns: 1fr; gap: 0; width: 100%; margin: 0; }
+      .sidebar { position: static; max-height: none; border-right: 0; border-left: 0; box-shadow: none; }
+      .page { border-right: 0; border-left: 0; box-shadow: none; }
+      header, main, footer, .toolbar { padding-right: 20px; padding-left: 20px; }
+      h1 { font-size: 30px; }
+      .memory-flow { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="左侧导航目录">
+      <div class="sidebar-head"><a href="index.html">C语言指针学习笔记</a></div>
+      <nav class="sidebar-group" aria-label="笔记目录">
+        <p class="sidebar-title">笔记目录</p>
+        <a class="sidebar-link" href="C语言基础指针.html">01 基础指针<small>地址、指向与解引用</small></a>
+        <a class="sidebar-link" href="C语言指针大小与内存地址.html">02 指针大小<small>大小、首地址与步长</small></a>
+        <a class="sidebar-link" href="C语言数组与指针.html">03 数组与指针<small>数组名、下标与边界</small></a>
+        <a class="sidebar-link active" href="C语言动态内存分配.html">04 动态内存<small>分配、释放与生命周期</small></a>
+      </nav>
+      <nav class="sidebar-group" aria-label="本篇目录">
+        <p class="sidebar-title">本篇目录</p>
+        <a class="sidebar-link section-link" href="#limits">一、传统数组的局限</a>
+        <a class="sidebar-link section-link" href="#why">二、为什么动态分配</a>
+        <a class="sidebar-link section-link" href="#malloc">三、malloc 与 free</a>
+        <a class="sidebar-link section-link" href="#array">四、构造动态数组</a>
+        <a class="sidebar-link section-link" href="#compare">五、两类内存比较</a>
+        <a class="sidebar-link section-link" href="#pointer">六、多级指针</a>
+        <a class="sidebar-link section-link" href="#function">七、跨函数使用</a>
+        <a class="sidebar-link section-link" href="#summary">八、最后总结</a>
+      </nav>
+    </aside>
+
+    <article class="page">
+      <header>
+        <p class="kicker">C语言 · 指针基础笔记 04</p>
+        <h1>动态内存分配</h1>
+        <p class="lead">在程序运行时按需申请内存，理解动态数组、多级指针、对象生命周期以及正确释放资源的方法。</p>
+      </header>
+
+      <nav class="toolbar" aria-label="笔记导航">
+        <a class="nav-link" href="index.html">← 返回笔记目录</a>
+        <a class="nav-link" href="C语言数组与指针.html">← 上一篇：数组与指针</a>
+        <button type="button" id="expand-all">＋ 全部展开</button>
+        <button type="button" id="collapse-all">− 全部收起</button>
+      </nav>
+
+      <main>
+        <section id="limits">
+          <h2>一、传统数组的四个局限</h2>
+          <p>普通局部数组通常在进入作用域时确定大小，适合长度明确、生命周期简单的数据。</p>
+          <table>
+            <thead><tr><th>局限</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>长度需要提前确定</td><td>固定长度数组不能在运行过程中扩容或缩小。</td></tr>
+              <tr><td>存储空间自动管理</td><td>离开数组所在的作用域后，不能再访问该局部数组。</td></tr>
+              <tr><td>生命周期受作用域限制</td><td>函数内的局部数组不能直接交给调用者长期保存。</td></tr>
+              <tr><td>可能浪费或不足</td><td>预留过大浪费空间，预留过小又无法容纳实际数据。</td></tr>
+            </tbody>
+          </table>
+          <pre><code>int fixed[3] = {1, 2, 3}; // 长度固定
+
+// int n = 5;
+// int a[n]; // C99 支持变长数组，但它仍不能动态扩容，生命周期也受作用域限制</code></pre>
+          <div class="correction">变长数组并不等于动态分配。它通常仍具有自动存储期，离开作用域后就失效。</div>
+        </section>
+
+        <section id="why">
+          <h2>二、为什么需要动态分配内存？</h2>
+          <p>当数据量只能在运行时确定，或对象需要在创建它的函数结束后继续存在时，可以向动态存储区申请空间。</p>
+          <div class="memory-flow" aria-label="动态内存使用流程">
+            <div class="memory-step"><strong>确定需求</strong><span>运行时得到元素个数</span></div>
+            <div class="arrow">→</div>
+            <div class="memory-step"><strong>申请并使用</strong><span>malloc 返回首地址</span></div>
+            <div class="arrow">→</div>
+            <div class="memory-step"><strong>主动释放</strong><span>free 归还内存</span></div>
+          </div>
+          <div class="conclusion">动态内存解决的是“大小在运行时决定”和“生命周期由程序控制”这两个核心问题。</div>
+        </section>
+
+        <section id="malloc">
+          <h2>三、认识 <code>malloc</code> 与 <code>free</code></h2>
+          <p><code>malloc</code> 声明在标准头文件 <code>&lt;stdlib.h&gt;</code> 中，参数是要申请的字节数，成功时返回内存首地址，失败时返回空指针。</p>
+          <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    int *p = malloc(sizeof *p);
+    if (p == NULL) {
+        return 1;
+    }
+
+    *p = 5;
+    printf("%d\n", *p);
+
+    free(p);
+    p = NULL;
+    return 0;
+}</code></pre>
+          <table>
+            <thead><tr><th>表达式</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td><code>int *p</code></td><td>指针变量本身，通常具有自动存储期。</td></tr>
+              <tr><td><code>malloc(sizeof *p)</code></td><td>申请足以存放一个 <code>int</code> 的空间。</td></tr>
+              <tr><td><code>*p = 5</code></td><td>通过指针访问动态分配的对象。</td></tr>
+              <tr><td><code>free(p)</code></td><td>释放 <code>p</code> 指向的动态内存，不会销毁变量 <code>p</code> 本身。</td></tr>
+            </tbody>
+          </table>
+          <details open>
+            <summary>为什么不写 <code>(int *)malloc(4)</code>？</summary>
+            <div class="answer"><p>标准 C 中 <code>void *</code> 会自动转换为对象指针，不需要强制转换。使用 <code>sizeof *p</code> 也比写死 4 更可移植，因为标准没有规定 <code>int</code> 必须占 4 字节。</p></div>
+          </details>
+          <div class="warning">释放后不能继续解引用原地址。将 <code>p</code> 设为 <code>NULL</code> 可以减少误用，但其他指向同一地址的指针仍会成为悬空指针。</div>
+        </section>
+
+        <section id="array">
+          <h2>四、构造一个动态数组</h2>
+          <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    size_t len;
+    printf("请输入数组长度：");
+    if (scanf("%zu", &amp;len) != 1 || len == 0) {
+        return 1;
+    }
+
+    int *arr = malloc(len * sizeof *arr);
+    if (arr == NULL) {
+        return 1;
+    }
+
+    for (size_t i = 0; i &lt; len; ++i) {
+        arr[i] = (int)(i + 1);
+    }
+
+    for (size_t i = 0; i &lt; len; ++i) {
+        printf("%d%c", arr[i], i + 1 == len ? '\n' : ' ');
+    }
+
+    free(arr);
+    arr = NULL;
+    return 0;
+}</code></pre>
+          <p><code>arr[i]</code> 仍然等价于 <code>*(arr + i)</code>。动态数组和普通数组都能使用下标，但动态数组的长度必须由程序另外保存。</p>
+          <div class="warning">当长度来自不可信输入时，还要检查 <code>len * sizeof *arr</code> 是否溢出。大型项目可在分配前判断 <code>len &gt; SIZE_MAX / sizeof *arr</code>。</div>
+        </section>
+
+        <section id="compare">
+          <h2>五、自动存储期与动态内存比较</h2>
+          <table>
+            <thead><tr><th>比较项</th><th>局部变量/数组</th><th>动态分配内存</th></tr></thead>
+            <tbody>
+              <tr><td>创建方式</td><td>通过变量声明创建</td><td>通过 <code>malloc</code> 等函数申请</td></tr>
+              <tr><td>释放方式</td><td>离开作用域时自动结束生命周期</td><td>程序调用 <code>free</code> 主动释放</td></tr>
+              <tr><td>大小</td><td>声明时确定；变长数组也不能扩容</td><td>可根据运行时数据决定</td></tr>
+              <tr><td>常见实现区域</td><td>通常位于栈中</td><td>通常位于堆中</td></tr>
+              <tr><td>主要风险</td><td>返回局部对象地址会产生无效指针</td><td>内存泄漏、重复释放和释放后使用</td></tr>
+            </tbody>
+          </table>
+          <div class="correction">“栈”和“堆”是常见实现概念；C 标准更准确的表述是自动存储期与动态分配对象。</div>
+        </section>
+
+        <section id="pointer">
+          <h2>六、多级指针表示逐级保存地址</h2>
+          <pre><code>int value = 10;
+int *p = &amp;value;
+int **q = &amp;p;
+int ***r = &amp;q;
+
+printf("%d\n", ***r); // 输出 10</code></pre>
+          <table>
+            <thead><tr><th>变量</th><th>保存的内容</th><th>解引用结果</th></tr></thead>
+            <tbody>
+              <tr><td><code>p</code></td><td><code>value</code> 的地址</td><td><code>*p</code> 是 <code>value</code></td></tr>
+              <tr><td><code>q</code></td><td><code>p</code> 的地址</td><td><code>*q</code> 是 <code>p</code></td></tr>
+              <tr><td><code>r</code></td><td><code>q</code> 的地址</td><td><code>***r</code> 是 <code>value</code></td></tr>
+            </tbody>
+          </table>
+          <div class="warning"><code>r = &amp;p</code> 类型不匹配：<code>r</code> 需要保存 <code>int **</code> 变量的地址，而 <code>&amp;p</code> 的类型是 <code>int **</code>，不是 <code>int ***</code> 所需的指向对象类型。</div>
+        </section>
+
+        <section id="function">
+          <h2>七、跨函数使用内存：修改调用者的指针</h2>
+          <p>函数参数按值传递。若函数需要让调用者的指针指向新分配的内存，可以传入该指针的地址，即使用二级指针。</p>
+          <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int create_number(int **out)
+{
+    *out = malloc(sizeof **out);
+    if (*out == NULL) {
+        return 0;
+    }
+
+    **out = 5;
+    return 1;
+}
+
+int main(void)
+{
+    int *p = NULL;
+
+    if (!create_number(&amp;p)) {
+        return 1;
+    }
+
+    printf("%d\n", *p);
+    free(p);
+    p = NULL;
+    return 0;
+}</code></pre>
+          <details open>
+            <summary>为什么不能返回局部变量的地址？</summary>
+            <div class="answer"><pre><code>int *wrong(void)
+{
+    int value = 5;
+    return &amp;value; // 错误：函数结束后 value 的生命周期结束
+}</code></pre><p>局部变量失效后，返回的地址不再指向有效对象。动态分配的对象不会因为创建它的函数返回而自动消失，因此可以交给调用者，但调用者最终必须负责释放。</p></div>
+          </details>
+          <details>
+            <summary>还可以直接返回动态内存地址吗？</summary>
+            <div class="answer"><p>可以。函数可以返回 <code>int *</code>，失败时返回 <code>NULL</code>。二级指针适合函数还需要用返回值表达成功状态，或同时输出多个结果的情况。</p></div>
+          </details>
+        </section>
+
+        <section id="summary">
+          <h2>八、最后总结</h2>
+          <div class="conclusion">动态内存的完整责任链是：计算大小、申请空间、检查结果、在合法边界内使用、明确所有权，最后恰好释放一次。</div>
+          <table>
+            <thead><tr><th>要点</th><th>推荐写法</th></tr></thead>
+            <tbody>
+              <tr><td>头文件</td><td><code>#include &lt;stdlib.h&gt;</code></td></tr>
+              <tr><td>申请大小</td><td><code>malloc(count * sizeof *p)</code></td></tr>
+              <tr><td>失败检查</td><td>使用前判断 <code>p == NULL</code></td></tr>
+              <tr><td>释放</td><td><code>free(p); p = NULL;</code></td></tr>
+              <tr><td>跨函数修改指针</td><td>传入指针地址，形参使用二级指针</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+
+      <footer>核心记忆：按需申请，检查结果，明确所有权，用完释放。</footer>
+    </article>
+  </div>
+
+  <script>
+    const details = document.querySelectorAll("details");
+
+    document.getElementById("expand-all").addEventListener("click", () => {
+      details.forEach((item) => {
+        item.open = true;
+      });
+    });
+
+    document.getElementById("collapse-all").addEventListener("click", () => {
+      details.forEach((item) => {
+        item.open = false;
+      });
+    });
+  </script>
+</body>
+</html>
