@@ -282,7 +282,8 @@ int main(void)
 
         <section id="array">
           <h2>四、构造一个动态数组</h2>
-          <pre><code>#include &lt;stdio.h&gt;
+          <pre><code>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 
 int main(void)
@@ -293,7 +294,12 @@ int main(void)
         return 1;
     }
 
-    int *arr = malloc(len * sizeof *arr);
+    int *arr;
+    if (len &gt; SIZE_MAX / sizeof *arr) {
+        return 1;
+    }
+
+    arr = malloc(len * sizeof *arr);
     if (arr == NULL) {
         return 1;
     }
@@ -311,7 +317,7 @@ int main(void)
     return 0;
 }</code></pre>
           <p><code>arr[i]</code> 仍然等价于 <code>*(arr + i)</code>。动态数组和普通数组都能使用下标，但动态数组的长度必须由程序另外保存。</p>
-          <div class="warning">当长度来自不可信输入时，还要检查 <code>len * sizeof *arr</code> 是否溢出。大型项目可在分配前判断 <code>len &gt; SIZE_MAX / sizeof *arr</code>。</div>
+          <div class="warning">长度来自输入时，必须在乘法和内存分配之前检查 <code>len &gt; SIZE_MAX / sizeof *arr</code>，防止字节数计算溢出后分配到过小的空间。</div>
         </section>
 
         <section id="compare">

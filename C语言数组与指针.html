@@ -492,13 +492,14 @@ int *p = a;  // 此处 a 转换为 &amp;a[0]</code></pre>
           <pre><code>int a[5] = {1, 2, 3, 4, 5};
 int *p = a;
 
-a        == &amp;a[0]
-*a       == a[0]
-a + 1    == &amp;a[1]
-*(a + 1) == a[1]
-a[i]     == *(a + i)
-p[i]     == *(p + i)</code></pre>
+a        等价于 &amp;a[0]
+*a       等价于 a[0]
+a + 1    等价于 &amp;a[1]
+*(a + 1) 等价于 a[1]
+a[i]     等价于 *(a + i)
+p[i]     等价于 *(p + i)</code></pre>
 
+          <p>这里的“等价于”用于说明表达式的含义，不是 C 语言的 <code>==</code> 比较运算符。上述关系的前提是下标和指针运算都在有效数组边界内。</p>
           <p>这些等价关系成立的核心是：加法按照所指元素类型移动。对于 <code>int *</code>，加 1 表示移动到下一个 <code>int</code> 元素。</p>
 
           <details>
@@ -531,7 +532,7 @@ p[2] = 300;</code></pre>
 
           <table>
             <thead>
-              <tr><th>表达式</th><th>访问对象</th><th>初始值</th></tr>
+              <tr><th>指针表达式</th><th>指向的元素</th><th>元素初始值</th></tr>
             </thead>
             <tbody>
               <tr><td><code>p</code>、<code>p + 0</code></td><td><code>a[0]</code></td><td>10</td></tr>

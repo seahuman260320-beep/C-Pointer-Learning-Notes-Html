@@ -527,15 +527,23 @@ printf("%zu\n", sizeof(r));</code></pre>
         <h2>五、指针类型真正影响什么？</h2>
         <p>指针类型通常不改变指针本身的大小，但会影响解引用方式和指针运算的步长。</p>
 
-        <pre><code>p + 1;  // char*   通常向后移动 1 字节
-q + 1;  // int*    通常向后移动 4 字节
-r + 1;  // double* 通常向后移动 8 字节</code></pre>
+        <pre><code>char   chars[2] = {'A', 'B'};
+int    ints[2] = {100, 200};
+double doubles[2] = {3.14, 6.28};
+
+char   *p = chars;
+int    *q = ints;
+double *r = doubles;
+
+p + 1;  // 指向 chars[1]，移动 sizeof *p 个字节
+q + 1;  // 指向 ints[1]，移动 sizeof *q 个字节
+r + 1;  // 指向 doubles[1]，移动 sizeof *r 个字节</code></pre>
 
         <details open>
           <summary>问题：为什么“指针加一”移动的字节数不同？</summary>
           <div class="answer">
-            <p>因为“加一”的含义是移动到下一个同类型元素，而不是单纯把地址数值增加 1。</p>
-            <p>如果 <code>q</code> 指向一个 <code>int</code>，那么 <code>q + 1</code> 应该越过当前整个 <code>int</code>，到达下一个 <code>int</code>。</p>
+            <p>因为“加一”的含义是移动到同一数组的下一个元素，而不是单纯把地址数值增加 1。</p>
+            <p>示例中 <code>q</code> 指向 <code>ints[0]</code>，所以 <code>q + 1</code> 越过一个完整的 <code>int</code> 元素后指向 <code>ints[1]</code>。指针只能在所属数组及其末尾后一个位置的范围内运算，末尾后一个位置不能解引用。</p>
           </div>
         </details>
       </section>

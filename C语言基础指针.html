@@ -624,7 +624,9 @@ if (q != NULL) {
         <h2>六、实参、形参与通过指针修改变量</h2>
         <div class="conclusion">实参是调用函数时提供的表达式；形参是被调用函数中接收实参值的新变量。C 语言的参数传递本质上都是值传递。</div>
 
-        <pre><code>void set_value(int *value)
+        <pre><code>#include &lt;stdio.h&gt;
+
+void set_value(int *value)
 {
     *value = 100;  // 修改 value 指向的对象
 }
